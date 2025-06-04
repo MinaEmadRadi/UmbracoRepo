@@ -5,10 +5,22 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="App_Plugins\Astroboard\astroboard\dist\index.html" />
+    <Content Include="App_Plugins\Astroboard\astroboard\dist\_astro\Dashboard.IfoPnuIB.css" />
+    <Content Include="App_Plugins\Astroboard\astroboard\dist\_astro\index.Bwsrms2G.css" />
+    <Content Include="App_Plugins\Astroboard\Lang\en-US.xml" />
     <Content Include="App_Plugins\BlockGridPreviews\navigationgroup.html" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App_Plugins\Astroboard\astroboard\dist\favicon.svg" />
+    <None Include="App_Plugins\Astroboard\astroboard\dist\_astro\client.Cc-yzRk5.js" />
+    <None Include="App_Plugins\Astroboard\astroboard\dist\_astro\client.Co0vMr8l.js" />
+    <None Include="App_Plugins\Astroboard\astroboard\dist\_astro\Dashboard.Cyz0v-4j.js" />
+    <None Include="App_Plugins\Astroboard\astroboard\dist\_astro\runtime-dom.esm-bundler.kMU7b04P.js" />
+    <None Include="App_Plugins\Astroboard\package.manifest" />
     <None Include="App_Plugins\BlockGridPreviews\package.manifest" />
+    <None Include="App_Plugins\Custom\backoffice\js\custom.js" />
+    <None Include="App_Plugins\Custom\package.manifest" />
   </ItemGroup>
 
   <ItemGroup>
