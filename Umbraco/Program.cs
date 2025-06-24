@@ -1,6 +1,7 @@
 using PocApp.Application.Services;
 using PocApp.Domain.Interfaces;
 using Umbraco.Infrastructure;
+using Our.Umbraco.PersonalisationGroups.Core;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -17,6 +18,7 @@ builder.CreateUmbracoBuilder()
    .AddWebsite()
    .AddDeliveryApi()
    .AddComposers()
+   .AddPersonalisationGroups(configuration)
    .Build();
 
 WebApplication app = builder.Build();
@@ -34,6 +36,7 @@ app.UseUmbraco()
        u.UseInstallerEndpoints();
        u.UseBackOfficeEndpoints();
        u.UseWebsiteEndpoints();
+       u.UsePersonalisationGroupsEndpoints();
    });
 
 

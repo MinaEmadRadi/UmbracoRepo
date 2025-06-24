@@ -13,7 +13,8 @@
 
   <ItemGroup>
     <PackageReference Include="Our.Umbraco.Community.Contentment" Version="4.7.0" />
-    <PackageReference Include="Umbraco.Cms" Version="13.6.0-rc" />
+    <PackageReference Include="Umbraco.Cms" Version="13.9.1" />
+    <PackageReference Include="UmbracoPersonalisationGroups" Version="3.4.0" />
   </ItemGroup>
 
   <ItemGroup>
