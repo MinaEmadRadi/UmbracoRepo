@@ -1,0 +1,28 @@
+﻿@using Our.Umbraco.PersonalisationGroups.Core.Services
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlogList>
+@inject IGroupMatchingService GroupMatchingService
+@{
+    var blogItems = Model?.Children<BlogItem>()?.Where(x => x.IsPublished() && x.ShowToVisitor(GroupMatchingService)).OrderByDescending(x => x.ScoreForVisitor(GroupMatchingService)) ?? Enumerable.Empty<BlogItem>();
+}
+
+@if (blogItems.Any())
+{
+    @foreach (var item in blogItems)
+    {
+        <hr class="my-4" />
+
+        <div class="post-preview">
+            <a href="@item.Url()">
+                <h2 class="post-title">@item.Title</h2>
+                <h3 class="post-subtitle">@item.Subtitle</h3>
+            </a>
+
+        </div>
+        <hr class="my-4" />
+    }
+}
+else
+{
+    <p>No blog posts found.</p>
+}
+

@@ -9,6 +9,7 @@
         <div class="row gx-4 gx-lg-5 justify-content-center">
             <div class="col-md-10 col-lg-8 col-xl-7">
                 <div id="partial-content">
+                    <partial name="Partials/_BlogList" model="Model" />
                 </div>
             </div>
         </div>
@@ -17,10 +18,10 @@
 
 @section Scripts {
     <script>
-        window.currentLanguage = "@language";
-        $(document).ready(function() {
-            BlogList.init();
-        });
+        // window.currentLanguage = "@language";
+        // $(document).ready(function() {
+        //     BlogList.init();
+        // });
     </script>
 }
 
