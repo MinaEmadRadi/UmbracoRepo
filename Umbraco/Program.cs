@@ -7,6 +7,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 builder.Services.AddScoped<IUmbracoApiService, UmbracoApiService>();
 
+// Add HttpContextAccessor for personalisation group logging
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<GlobalExceptionFilter>();

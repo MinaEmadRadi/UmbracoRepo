@@ -2,9 +2,116 @@
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlogList>
 @inject IGroupMatchingService GroupMatchingService
 @{
-    var blogItems = Model?.Children<BlogItem>()?.Where(x => x.IsPublished() && x.ShowToVisitor(GroupMatchingService)).OrderByDescending(x => x.ScoreForVisitor(GroupMatchingService)) ?? Enumerable.Empty<BlogItem>();
+    // Get all published blog items
+    var allPublishedBlogs = Model?.Children<BlogItem>()?.Where(x => x.IsPublished()) ?? Enumerable.Empty<BlogItem>();
+    
+    // Get all personalisation groups for debugging - improved loading logic
+    var rootContent = Umbraco.ContentAtRoot();
+    var personalisationGroupsFolder = rootContent?.FirstOrDefault(x => x.ContentType.Alias == "personalisationGroupsFolder");
+    var allPersonalisationGroups = personalisationGroupsFolder?.Children<PersonalisationGroup>()?.Where(x => x.IsPublished()) ?? Enumerable.Empty<PersonalisationGroup>();
+    
+    // Debug: Check if folder exists and is published
+    var folderExists = personalisationGroupsFolder != null;
+    var folderPublished = personalisationGroupsFolder?.IsPublished() ?? false;
+    var groupsCount = allPersonalisationGroups.Count();
+    
+    // Debug: List all root content to see what's available
+    var rootContentList = rootContent?.Select(x => new { Name = x.Name, Type = x.ContentType.Alias, Published = x.IsPublished() }) ?? Enumerable.Empty<object>();
+    
+    // Log current user/session information
+    Umbraco.Cms.Core.Models.IMember? currentUser = null;
+    var isAuthenticated = Context?.User?.Identity?.IsAuthenticated == true;
+    if (isAuthenticated)
+    {
+        var memberManager = Context.RequestServices.GetService(typeof(Umbraco.Cms.Core.Security.IMemberManager)) as Umbraco.Cms.Core.Security.IMemberManager;
+        if (memberManager != null)
+        {
+            var memberUser = await memberManager.GetCurrentMemberAsync();
+            if (memberUser != null)
+            {
+                var memberService = Context.RequestServices.GetService(typeof(Umbraco.Cms.Core.Services.IMemberService)) as Umbraco.Cms.Core.Services.IMemberService;
+                if (memberService != null)
+                {
+                    currentUser = memberService.GetByKey(memberUser.Key);
+                }
+            }
+        }
+    }
+    var sessionId = Context?.Session?.Id ?? "No Session";
+    
+    // Check which personalisation groups the current visitor matches
+    var matchedGroups = new List<string>();
+    var groupScores = new Dictionary<string, int>();
+    
+    foreach (var group in allPersonalisationGroups)
+    {
+        try
+        {
+            var matches = GroupMatchingService.MatchGroup(group);
+            if (matches)
+            {
+                matchedGroups.Add(group.Name);
+                groupScores[group.Name] = group.Definition?.Score ?? 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log any errors in group matching
+            System.Diagnostics.Debug.WriteLine($"Error matching group {group.Name}: {ex.Message}");
+        }
+    }
+    
+    // Filter by personalisation groups if any are assigned
+    var blogItems = allPublishedBlogs.Where(x => x.ShowToVisitor(GroupMatchingService)).OrderByDescending(x => x.ScoreForVisitor(GroupMatchingService));
+    
+    // Debug information
+    var totalBlogs = allPublishedBlogs.Count();
+    var filteredBlogs = blogItems.Count();
+    
+    // If no items match personalisation groups, show all published blogs as fallback
+    if (!blogItems.Any() && allPublishedBlogs.Any())
+    {
+        blogItems = allPublishedBlogs.OrderByDescending(x => x.CreateDate);
+    }
 }
 
+<!-- Debug Information Panel -->
+<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc; font-family: monospace; font-size: 12px;">
+    <h4>Personalisation Groups Debug Info:</h4>
+    <p><strong>Session ID:</strong> @sessionId</p>
+    <p><strong>Authenticated:</strong> @isAuthenticated</p>
+    <p><strong>Current User:</strong> @(currentUser?.Name ?? "Anonymous")</p>
+    <p><strong>Total Published Blogs:</strong> @totalBlogs</p>
+    <p><strong>Filtered Blogs:</strong> @filteredBlogs</p>
+    <p><strong>Matched Groups:</strong> @(matchedGroups.Any() ? string.Join(", ", matchedGroups) : "None")</p>
+    @if (groupScores.Any())
+    {
+        <p><strong>Group Scores:</strong></p>
+        <ul>
+            @foreach (var score in groupScores.OrderByDescending(x => x.Value))
+            {
+                <li>@score.Key: @score.Value</li>
+            }
+        </ul>
+    }
+    <p><strong>Personalisation Groups Folder:</strong> @(folderExists ? "Found" : "Not Found")</p>
+    <p><strong>Folder Published:</strong> @folderPublished</p>
+    <p><strong>Available Groups Count:</strong> @groupsCount</p>
+    <p><strong>Available Groups:</strong> @string.Join(", ", allPersonalisationGroups.Select(g => g.Name))</p>
+    <p><strong>Root Content Count:</strong> @(Umbraco.ContentAtRoot()?.Count() ?? 0)</p>
+    <p><strong>Root Content Items:</strong></p>
+    <ul>
+        @foreach (var item in rootContentList)
+        {
+            var nameProp = item.GetType().GetProperty("Name");
+            var typeProp = item.GetType().GetProperty("Type");
+            var publishedProp = item.GetType().GetProperty("Published");
+            var name = nameProp != null ? nameProp.GetValue(item) : "";
+            var type = typeProp != null ? typeProp.GetValue(item) : "";
+            var published = publishedProp != null ? publishedProp.GetValue(item) : "";
+            <li>@name (@type) - Published: @published</li>
+        }
+</div>
 
 @if (blogItems.Any())
 {
@@ -17,7 +124,14 @@
                 <h2 class="post-title">@item.Title</h2>
                 <h3 class="post-subtitle">@item.Subtitle</h3>
             </a>
-
+            <!-- Show personalisation groups for this blog item -->
+            @{
+                var itemGroups = item.PersonalisationGroups?.Select(g => g.Name) ?? Enumerable.Empty<string>();
+            }
+            @if (itemGroups.Any())
+            {
+                <small style="color: #666;">Groups: @string.Join(", ", itemGroups)</small>
+            }
         </div>
         <hr class="my-4" />
     }
