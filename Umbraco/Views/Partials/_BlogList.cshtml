@@ -5,6 +5,7 @@
     var blogItems = Model?.Children<BlogItem>()?.Where(x => x.IsPublished() && x.ShowToVisitor(GroupMatchingService)).OrderByDescending(x => x.ScoreForVisitor(GroupMatchingService)) ?? Enumerable.Empty<BlogItem>();
 }
 
+
 @if (blogItems.Any())
 {
     @foreach (var item in blogItems)
