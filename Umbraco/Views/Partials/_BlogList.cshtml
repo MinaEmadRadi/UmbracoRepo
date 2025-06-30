@@ -1,6 +1,8 @@
 ﻿@using Our.Umbraco.PersonalisationGroups.Core.Services
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlogList>
+
 @inject IGroupMatchingService GroupMatchingService
+@Umbraco.MatchesGroup(GroupMatchingService, "Investors interested in Tech")
 @{
     // Get all published blog items
     var allPublishedBlogs = Model?.Children<BlogItem>()?.Where(x => x.IsPublished()) ?? Enumerable.Empty<BlogItem>();
