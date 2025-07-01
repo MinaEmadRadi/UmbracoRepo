@@ -2,8 +2,8 @@
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlogList>
 
 @inject IGroupMatchingService GroupMatchingService
-@Umbraco.MatchesGroup(GroupMatchingService, "Investors interested in Tech")
-@{
+@* @Umbraco.MatchesGroup(GroupMatchingService, "Investors interested in Tech")
+ *@@{
     // Get all published blog items
     var allPublishedBlogs = Model?.Children<BlogItem>()?.Where(x => x.IsPublished()) ?? Enumerable.Empty<BlogItem>();
     
@@ -64,21 +64,21 @@
     }
     
     // Filter by personalisation groups if any are assigned
-    var blogItems = allPublishedBlogs.Where(x => x.ShowToVisitor(GroupMatchingService)).OrderByDescending(x => x.ScoreForVisitor(GroupMatchingService));
+    var blogItems = allPublishedBlogs/* .Where(x => x.ShowToVisitor(GroupMatchingService,false)) */.OrderByDescending(x => x.ScoreForVisitor(GroupMatchingService));
     
     // Debug information
     var totalBlogs = allPublishedBlogs.Count();
     var filteredBlogs = blogItems.Count();
     
     // If no items match personalisation groups, show all published blogs as fallback
-    if (!blogItems.Any() && allPublishedBlogs.Any())
-    {
-        blogItems = allPublishedBlogs.OrderByDescending(x => x.CreateDate);
-    }
+    // if (!blogItems.Any() && allPublishedBlogs.Any())
+    // {
+    //     blogItems = allPublishedBlogs.OrderByDescending(x => x.CreateDate);
+    // }
 }
 
 <!-- Debug Information Panel -->
-<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc; font-family: monospace; font-size: 12px;">
+@* <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc; font-family: monospace; font-size: 12px;">
     <h4>Personalisation Groups Debug Info:</h4>
     <p><strong>Session ID:</strong> @sessionId</p>
     <p><strong>Authenticated:</strong> @isAuthenticated</p>
@@ -114,7 +114,7 @@
             <li>@name (@type) - Published: @published</li>
         }
 </div>
-
+ *@
 @if (blogItems.Any())
 {
     @foreach (var item in blogItems)
